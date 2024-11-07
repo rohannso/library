@@ -1,0 +1,102 @@
+-- CREATE DATABASE PRACT_4;
+-- USE PRACT_4;
+-- CREATE TABLE BORROWER(
+--     Roll_no INT PRIMARY KEY,
+--     Name VARCHAR(100),
+--     Date_of_Issue DATE,
+--     Name_book VARCHAR(100),
+--     Status VARCHAR(100));
+-- CREATE TABLE FINE(
+--     Roll_no INT,
+--     Ret_date DATE,
+--     Amt INT);
+
+-- delimiter $
+-- create procedure fine_calculation(IN rno int,bname varchar(100))
+--     begin
+--     declare i_date date;
+--     declare diff int;
+--     declare v_status varchar(100);
+--     declare fine_amt int;
+--     declare exit handler for sqlexception select 'Table not found';
+--     select Date_of_Issue,Status into i_date,v_status from BORROWER where Roll_no = rno and Name_book = bname;
+--     select datediff(curdate(),i_date) into diff;
+--     if(v_status!='I') then
+--     SELECT 'The book is not currently issued or invalid input.' as message;
+--     elseif(v_status='I') then
+--     if(diff>15 and diff<30) then
+--     set fine_amt = diff*5;
+--     insert into fine values(rno,curdate(),fine_amt);
+--     elseif(diff>30) then
+--     set fine_amt = 30*5 + (diff-30)*50;
+--     insert into fine values(rno,curdate(),fine_amt);
+--     end if;
+--    update borrower set status = 'R' where Roll_no=rno and Name_book = bname;
+--    end if;
+--     end;
+--     $
+
+-- INSERT INTO Borrower (Roll_no, Name, Date_of_Issue, Name_Book, Status) VALUES
+--     -> (101, 'John Doe', '2024-09-01', 'Database Concepts', 'I'),
+--     -> (102, 'Jane Smith', '2024-09-05', 'Data Structures', 'I'),
+--     -> (103, 'Alice Johnson', '2024-09-10', 'Database Systems', 'I');
+--     -> $
+-- DELIMITER ;
+-- CALL fine_calculation(102,'Data Structures');
+
+-- SELECT * FROM FINE;
+-- SELECT * FROM BORROWER;
+
+CREATE DATABASE PRACT_4;
+USE PRACT_4;
+
+CREATE TABLE BORROWER (
+    Roll_no INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Date_of_Issue DATE,
+    Name_book VARCHAR(100),
+    Status VARCHAR(100)
+);
+
+CREATE TABLE FINE (
+    Roll_no INT,
+    Ret_date DATE,
+    Amt INT
+);
+
+DELIMITER $
+CREATE PROCEDURE fine_calculation(IN rno INT, bname VARCHAR(100))
+BEGIN
+    DECLARE i_date DATE;
+    DECLARE diff INT;
+    DECLARE v_status VARCHAR(100);
+    DECLARE fine_amt INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT 'Table not found';
+
+    SELECT Date_of_Issue, Status INTO i_date, v_status FROM BORROWER WHERE Roll_no = rno AND Name_book = bname;
+    SELECT DATEDIFF(CURDATE(), i_date) INTO diff;
+
+    IF (v_status != 'I') THEN
+        SELECT 'The book is not currently issued or invalid input.' AS message;
+    ELSEIF (v_status = 'I') THEN
+        IF (diff > 15 AND diff < 30) THEN
+            SET fine_amt = diff * 5;
+            INSERT INTO FINE VALUES (rno, CURDATE(), fine_amt);
+        ELSEIF (diff > 30) THEN
+            SET fine_amt = 30 * 5 + (diff - 30) * 50;
+            INSERT INTO FINE VALUES (rno, CURDATE(), fine_amt);
+        END IF;
+        UPDATE BORROWER SET Status = 'R' WHERE Roll_no = rno AND Name_book = bname;
+    END IF;
+END $
+DELIMITER ;
+
+INSERT INTO BORROWER (Roll_no, Name, Date_of_Issue, Name_Book, Status) VALUES
+    (101, 'John Doe', '2024-09-01', 'Database Concepts', 'I'),
+    (102, 'Jane Smith', '2024-09-05', 'Data Structures', 'I'),
+    (103, 'Alice Johnson', '2024-09-10', 'Database Systems', 'I');
+
+CALL fine_calculation(102, 'Data Structures');
+
+SELECT * FROM FINE;
+SELECT * FROM BORROWER;
